@@ -1,10 +1,12 @@
 # Walkthrough Video
 
-> **Add your walkthrough video link here before submission.**
+**Video Link:** <!-- Record a ~5-minute Loom or YouTube video and paste the link here before submission -->
 
-**Video Link:** <!-- e.g. https://www.loom.com/share/your-video-id -->
-
-The video should be ~5 minutes and cover:
-- A live demo of your deployed dashboard
-- A brief walkthrough of your key technical decisions
-- Any tradeoffs or things you'd do differently with more time
+The video should cover:
+- A live demo of the deployed dashboard at https://src-nu-red.vercel.app
+- Tab 1: Market Overview — show the live EIA/FRED KPIs loading and the two charts
+- Tab 2: Project Economics — run a scenario, show IRR/NPV/LCOE output, open the sensitivity heatmap, generate an AI Investment Memo
+- Tab 3: Geographic Visualization — click a state, push the rate to the calculator
+- Tab 4: Research Assistant — ask a question about the current project scenario; point out the live context panel
+- Brief mention of key technical decisions: Zustand cross-tab state, Next.js API route proxies, Claude streaming SSE
+- One tradeoff or thing you'd do differently
