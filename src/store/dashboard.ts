@@ -106,15 +106,15 @@ interface DashboardStore {
 
 const baseScenario: CalculatorScenario = {
   name: 'base',
-  systemSizeKW: 1000,
+  systemSizeKW: 10000,        // 10 MW — typical utility-scale project
   capacityFactor: 22,
   degradationRate: 0.5,
   projectLifeYears: 25,
   installCostPerW: 1.10,
   omCostPerKWYear: 17,
-  electricityRateCentsPerKWh: 12,
-  annualEscalation: 2,
-  debtPercent: 60,
+  electricityRateCentsPerKWh: 6.5,  // Wholesale PPA rate (not retail) — utility solar sells at 5–8¢
+  annualEscalation: 1.5,
+  debtPercent: 55,
   interestRate: 5.5,
   loanTermYears: 18,
   itcPercent: 30,
@@ -125,8 +125,8 @@ const optimisticScenario: CalculatorScenario = {
   name: 'optimistic',
   capacityFactor: 26,
   installCostPerW: 0.95,
-  electricityRateCentsPerKWh: 14,
-  annualEscalation: 3,
+  electricityRateCentsPerKWh: 8.0,  // Higher PPA or merchant premium
+  annualEscalation: 2.5,
   interestRate: 4.5,
 }
 
@@ -134,9 +134,9 @@ const conservativeScenario: CalculatorScenario = {
   ...baseScenario,
   name: 'conservative',
   capacityFactor: 18,
-  installCostPerW: 1.25,
-  electricityRateCentsPerKWh: 10,
-  annualEscalation: 1,
+  installCostPerW: 1.30,
+  electricityRateCentsPerKWh: 5.5,  // Compressed merchant market
+  annualEscalation: 0.5,
   interestRate: 6.5,
 }
 

@@ -117,11 +117,15 @@ export function runCalculation(scenario: CalculatorScenario): CalculatorResults 
   // ── Project Cost ──────────────────────────────────────────────────────────
   const grossProjectCost = systemSizeKW * 1000 * installCostPerW
   const itcValue = grossProjectCost * (itcPercent / 100)
-  const totalProjectCostUSD = grossProjectCost  // ITC reduces tax liability, not upfront cost
+  // Net cost after ITC — ITC is a federal tax credit that reduces effective project cost
+  const totalProjectCostUSD = grossProjectCost - itcValue
 
   // ── Financing ─────────────────────────────────────────────────────────────
+  // Debt sized on gross project cost (lenders lend against full asset value)
+  // Equity = gross cost - debt (sponsor's cash investment before ITC benefit)
+  // ITC reduces effective cost basis but is not modelled as a cash flow here
   const debtAmount = grossProjectCost * (debtPercent / 100)
-  const equityAmount = grossProjectCost - debtAmount - itcValue
+  const equityAmount = grossProjectCost - debtAmount
   const annualDebtService = calculateAnnualDebtService(debtAmount, interestRate, loanTermYears)
 
   // ── Year 1 Energy & Revenue ───────────────────────────────────────────────
