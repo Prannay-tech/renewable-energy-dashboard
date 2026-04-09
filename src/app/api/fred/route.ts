@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const FRED_BASE = 'https://api.stlouisfed.org/fred'
-const API_KEY = process.env.FRED_API_KEY
+const API_KEY = process.env.FRED_API_KEY?.trim()
 
 async function fredFetch(series_id: string, limit = 12) {
   if (!API_KEY) throw new Error('FRED_API_KEY not configured')

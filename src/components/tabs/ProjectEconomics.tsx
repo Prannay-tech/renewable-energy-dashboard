@@ -11,7 +11,8 @@ import type { CalculatorScenario } from '@/store/dashboard'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip as InfoTooltip } from '@/components/ui/tooltip'
-import { MapPin, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react'
+import { MapPin, TrendingUp, ChevronDown, ChevronUp, FileText, Loader2, Sparkles } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // ─── Input Field Component ────────────────────────────────────────────────────
 
@@ -192,6 +193,10 @@ function SensitivityHeatmap({ scenario }: { scenario: CalculatorScenario }) {
 export default function ProjectEconomics() {
   const { scenarios, activeScenario, results, selectedState, setActiveScenario, updateScenario, setResults } = useDashboardStore()
   const [showSensitivity, setShowSensitivity] = useState(false)
+  const [aiSummary, setAiSummary] = useState<string | null>(null)
+  const [aiSummaryLoading, setAiSummaryLoading] = useState(false)
+  const [aiSummaryError, setAiSummaryError] = useState<string | null>(null)
+  const [showAiSummary, setShowAiSummary] = useState(false)
 
   const scenario = scenarios[activeScenario]
 
@@ -225,13 +230,90 @@ export default function ProjectEconomics() {
     return 'bad'
   }
 
+  const { marketSnapshot } = useDashboardStore()
+
+  const generateAiSummary = async () => {
+    if (!result) return
+    setAiSummaryLoading(true)
+    setAiSummaryError(null)
+    setShowAiSummary(true)
+    try {
+      const res = await fetch('/api/ai-summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scenario, results: result, marketSnapshot, selectedState }),
+      })
+      if (!res.ok) throw new Error(`API error: ${res.status}`)
+      const data = await res.json()
+      setAiSummary(data.summary)
+    } catch (err) {
+      setAiSummaryError(err instanceof Error ? err.message : 'Failed to generate summary')
+    } finally {
+      setAiSummaryLoading(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h2 className="text-xl font-bold text-white">Project Economics Calculator</h2>
-        <p className="text-sm text-slate-400 mt-0.5">Solar project financial model — all calculations run client-side instantly</p>
+      <div className="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="text-xl font-bold text-white">Project Economics Calculator</h2>
+          <p className="text-sm text-slate-400 mt-0.5">Solar project financial model — all calculations run client-side instantly</p>
+        </div>
+        <button
+          onClick={generateAiSummary}
+          disabled={aiSummaryLoading || !result}
+          className="flex items-center gap-2 px-4 py-2 bg-purple-700 hover:bg-purple-600 disabled:opacity-50 rounded-lg text-sm text-white font-medium transition-colors border border-purple-600"
+        >
+          {aiSummaryLoading
+            ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating...</>
+            : <><Sparkles className="w-4 h-4" /> AI Investment Summary</>
+          }
+        </button>
       </div>
+
+      {/* AI Investment Summary Panel */}
+      {showAiSummary && (
+        <Card className="border-purple-800 bg-purple-950/20">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                <CardTitle className="text-purple-300">AI Investment Memo</CardTitle>
+                <Badge variant="blue">Claude claude-sonnet-4-5</Badge>
+              </div>
+              <button onClick={() => setShowAiSummary(false)} className="text-slate-400 hover:text-white text-xs">✕ Close</button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {aiSummaryLoading && (
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-4/5" />
+              </div>
+            )}
+            {aiSummaryError && (
+              <p className="text-red-400 text-sm">{aiSummaryError}</p>
+            )}
+            {aiSummary && !aiSummaryLoading && (
+              <div className="prose prose-invert prose-sm max-w-none">
+                <div className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap font-mono bg-slate-900/50 rounded-lg p-4 border border-slate-700">
+                  {aiSummary}
+                </div>
+                <p className="text-xs text-slate-500 mt-3 flex items-center gap-1">
+                  <FileText className="w-3 h-3" />
+                  AI-generated memo · Grounded in live EIA &amp; FRED data · {new Date().toLocaleString()}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Location badge */}
       {selectedState && (

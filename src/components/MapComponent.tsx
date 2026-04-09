@@ -55,10 +55,15 @@ export default function MapComponent({
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return
+    if (!containerRef.current) return
+    // Guard against double-init in React strict mode
+    if (mapRef.current) return
+
+    let cancelled = false
 
     const initMap = async () => {
       const L = (await import('leaflet')).default
+      if (cancelled || !containerRef.current) return
 
       // Fix leaflet default icon paths
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,7 +74,14 @@ export default function MapComponent({
         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       })
 
-      const map = L.map(containerRef.current!, {
+      // Destroy any stale Leaflet instance that may be attached to the DOM node
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((containerRef.current as any)._leaflet_id) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(containerRef.current as any)._leaflet_id = null
+      }
+
+      const map = L.map(containerRef.current, {
         center: [39.5, -98.35],
         zoom: 4,
         zoomControl: true,
@@ -88,6 +100,7 @@ export default function MapComponent({
     initMap()
 
     return () => {
+      cancelled = true
       if (mapRef.current) {
         mapRef.current.remove()
         mapRef.current = null

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "renewable-dashboard",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["/Users/prannaykhushalani/renewable-energy-analysis-dashboard-Prannay-tech-1/start-dev.sh"],
+      "port": 3000
+    }
+  ]
+}
